@@ -30,30 +30,36 @@ class DynamicScope(abc.Mapping):
 
 
 def get_dynamic_re() -> DynamicScope:
-    dictionary = DynamicScope()
+    # define the dynamic scope
+    dyn_scope = DynamicScope()
 
     def get_size():
         size = -1
-        stack = inspect.stack()
-        while stack != []:
-            stack.pop()
+        stk = inspect.stack()
+        # loop through the stack and get the size
+        while stk != []:
+            stk.pop()
             size += 1
         return size
 
-    def get_locals(size):
-        stack_info = inspect.stack()
+    def set_dynamic_local_vars(size):
+        # get the stack information
+        stack_inf = inspect.stack()
         i = 2
+
+        # loop through the stack and get the local variables
         for _ in range(size - 1):
-            frame = stack_info[i][0]
-            freevars = list(frame.f_code.co_freevars)
-            localvars = list(frame.f_locals)
-            localvars2 = frame.f_locals
+            frame = stack_inf[i][0]
+            free_v = list(frame.f_code.co_freevars)
+            local_v = list(frame.f_locals)
+            frame_loc_v = frame.f_locals
             i += 1
-            toadd = [x for x in localvars if x not in freevars]
-            for keys in toadd:
-                if type(localvars2[keys]) == str:
-                    dictionary.__setitem__(keys, localvars2[keys])
+            vars_to_add = [x for x in local_v if x not in free_v]
+            # add the local variables to the dictionary
+            for keys in vars_to_add:
+                if type(frame_loc_v[keys]) == str:
+                    dyn_scope.__setitem__(keys, frame_loc_v[keys])
         return None
 
-    get_locals(get_size())
-    return dictionary
+    set_dynamic_local_vars(get_size())
+    return dyn_scope
